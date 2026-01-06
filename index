@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TITAN OS | Gamified Study Ecosystem</title>
+    
+    <meta name="theme-color" content="#0f172a">
+    <meta name="description" content="The most addictive way to master coding. Gamified, aesthetic, and powerful.">
+    <link rel="manifest" href="manifest.json">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script> <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script> <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: {
+                        brand: { 50: '#eef2ff', 500: '#6366f1', 600: '#4f46e5', 900: '#312e81' },
+                        cyber: { pink: '#f472b6', blue: '#38bdf8', purple: '#c084fc' },
+                        dark: { bg: '#0b0f19', card: '#111827', border: '#1f2937' }
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                    },
+                    keyframes: {
+                        blob: { '0%': { transform: 'translate(0px, 0px) scale(1)' }, '33%': { transform: 'translate(30px, -50px) scale(1.1)' }, '66%': { transform: 'translate(-20px, 20px) scale(0.9)' }, '100%': { transform: 'translate(0px, 0px) scale(1)' } },
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        pulseGlow: { '0%, 100%': { opacity: 1, boxShadow: '0 0 20px #6366f1' }, '50%': { opacity: .5, boxShadow: '0 0 10px #6366f1' } }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Sensory Design */
+        body { font-family: 'Outfit', sans-serif; overflow-x: hidden; }
+        .glass { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass-light { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(0, 0, 0, 0.05); }
+        
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -15px rgba(99, 102, 241, 0.3); }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+
+        /* Neon Glows */
+        .neon-text { text-shadow: 0 0 10px rgba(99, 102, 241, 0.5); }
+        .neon-border { box-shadow: 0 0 15px rgba(99, 102, 241, 0.3); }
+
+        /* Loader */
+        .loader { border-top-color: #6366f1; -webkit-animation: spinner 1.5s linear infinite; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Mobile Optimization */
+        @media (max-width: 768px) { .mobile-hide { display: none; } }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-dark-bg text-slate-800 dark:text-slate-200 transition-colors duration-300 selection:bg-brand-500 selection:text-white">
+
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-brand-500/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+        <div class="absolute top-0 right-1/4 w-96 h-96 bg-cyber-purple/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-32 left-1/3 w-96 h-96 bg-cyber-pink/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+    </div>
+
+    <div id="auth-screen" class="fixed inset-0 z-[100] bg-dark-bg/95 backdrop-blur-xl flex items-center justify-center">
+        <div class="glass p-10 rounded-3xl w-full max-w-md text-center border-t border-white/10 relative overflow-hidden group">
+            <div class="absolute inset-0 bg-gradient-to-br from-brand-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
+            <div class="relative z-10">
+                <div class="w-20 h-20 bg-brand-600 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-2xl shadow-brand-500/50">
+                    <i class="fa-solid fa-bolt text-4xl text-white"></i>
+                </div>
+                <h1 class="text-5xl font-black mb-2 tracking-tighter text-white">TITAN<span class="text-brand-500">OS</span></h1>
+                <p class="text-slate-400 mb-8 font-mono text-sm">v2.0 // SYSTEM_READY</p>
+                <button onclick="app.auth.signIn()" class="w-full py-4 bg-white hover:bg-slate-100 text-slate-900 font-bold rounded-xl transition-all transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3 shadow-lg">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5"> Initialize Session
+                </button>
+                <p class="mt-6 text-xs text-slate-500">By entering, you agree to become a coding god.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-container" class="relative z-10 flex h-screen overflow-hidden hidden opacity-0 transition-opacity duration-1000">
+        
+        <aside class="w-20 lg:w-72 bg-white/5 dark:bg-dark-card/60 backdrop-blur-xl border-r border-white/5 flex flex-col justify-between transition-all duration-300 group z-50">
+            <div class="p-6 border-b border-white/5">
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <img id="user-avatar" src="" class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl object-cover ring-2 ring-brand-500/50">
+                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-dark-card"></div>
+                    </div>
+                    <div class="hidden lg:block overflow-hidden">
+                        <h3 id="user-name" class="font-bold text-sm truncate text-white">Guest</h3>
+                        <div class="flex items-center gap-1 text-[10px] text-brand-400 font-mono">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span id="user-rank">Novice</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto py-6 space-y-2 px-3">
+                <button onclick="app.nav.go('dashboard')" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-brand-500/10 hover:text-brand-400 transition-all group-hover:justify-start lg:justify-start justify-center active">
+                    <i class="fa-solid fa-grid-2 w-6 text-center"></i> <span class="hidden lg:block font-medium">Command Center</span>
+                </button>
+                <button onclick="app.nav.go('syllabus')" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-brand-500/10 hover:text-brand-400 transition-all group-hover:justify-start lg:justify-start justify-center">
+                    <i class="fa-solid fa-list-check w-6 text-center"></i> <span class="hidden lg:block font-medium">Syllabus</span>
+                </button>
+                <button onclick="app.nav.go('kanban')" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-brand-500/10 hover:text-brand-400 transition-all group-hover:justify-start lg:justify-start justify-center">
+                    <i class="fa-solid fa-columns w-6 text-center"></i> <span class="hidden lg:block font-medium">Kanban Board</span>
+                </button>
+                <button onclick="app.nav.go('shop')" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-brand-500/10 hover:text-yellow-400 transition-all group-hover:justify-start lg:justify-start justify-center">
+                    <i class="fa-solid fa-store w-6 text-center"></i> <span class="hidden lg:block font-medium">Titan Shop</span>
+                </button>
+                <button onclick="app.nav.go('leaderboard')" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-brand-500/10 hover:text-brand-400 transition-all group-hover:justify-start lg:justify-start justify-center">
+                    <i class="fa-solid fa-trophy w-6 text-center"></i> <span class="hidden lg:block font-medium">League</span>
+                </button>
+            </nav>
+
+            <div class="p-4 border-t border-white/5 space-y-2">
+                 <button onclick="app.ui.toggleZen()" class="w-full flex items-center justify-center lg:justify-start gap-4 p-3 rounded-xl hover:bg-white/5 text-slate-400 transition-all" title="Zen Mode">
+                    <i class="fa-solid fa-spa w-6 text-center"></i> <span class="hidden lg:block text-xs font-bold uppercase tracking-wider">Zen Mode</span>
+                </button>
+                <button onclick="app.auth.signOut()" class="w-full flex items-center justify-center lg:justify-start gap-4 p-3 rounded-xl hover:bg-red-500/10 text-red-400 transition-all">
+                    <i class="fa-solid fa-power-off w-6 text-center"></i> <span class="hidden lg:block text-xs font-bold uppercase tracking-wider">Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-hidden relative flex flex-col">
+            
+            <header class="h-16 border-b border-white/5 bg-dark-bg/80 backdrop-blur flex justify-between items-center px-6 lg:px-8 z-40">
+                <div class="flex items-center gap-4">
+                    <h2 id="page-title" class="text-xl font-bold text-white tracking-tight">Dashboard</h2>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-orange-500/10 rounded-lg border border-orange-500/20 text-orange-400">
+                        <i class="fa-solid fa-fire animate-pulse"></i> <span id="streak-display" class="font-mono font-bold">0</span>
+                    </div>
+
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/10 rounded-lg border border-yellow-500/20 text-yellow-400 cursor-pointer" onclick="app.nav.go('shop')">
+                        <i class="fa-solid fa-coins"></i> <span id="coin-display" class="font-mono font-bold">0</span>
+                    </div>
+
+                    <div class="relative group">
+                        <button onclick="app.audio.togglePlayer()" class="w-10 h-10 rounded-full bg-white/5 hover:bg-brand-500 hover:text-white flex items-center justify-center transition-all text-slate-400">
+                            <i class="fa-solid fa-music"></i>
+                        </button>
+                        <div id="mini-player" class="absolute right-0 top-12 w-64 glass rounded-2xl p-4 hidden shadow-2xl animate-fade-in-down transform origin-top-right">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase mb-3">Lo-Fi Station</h4>
+                            <div class="flex justify-between items-center mb-4">
+                                <button onclick="app.audio.playTrack('rain')" class="p-2 rounded-lg hover:bg-white/10 text-xl"><i class="fa-solid fa-cloud-rain"></i></button>
+                                <button onclick="app.audio.playTrack('cafe')" class="p-2 rounded-lg hover:bg-white/10 text-xl"><i class="fa-solid fa-mug-hot"></i></button>
+                                <button onclick="app.audio.playTrack('lofi')" class="p-2 rounded-lg hover:bg-white/10 text-xl"><i class="fa-solid fa-radio"></i></button>
+                            </div>
+                            <input type="range" class="w-full accent-brand-500 h-1 bg-white/10 rounded-lg appearance-none cursor-pointer" oninput="app.audio.setVolume(this.value)">
+                        </div>
+                    </div>
+
+                    <button onclick="app.ui.togglePomo()" class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-500 to-cyber-purple text-white shadow-lg shadow-brand-500/40 hover:scale-110 transition-transform flex items-center justify-center">
+                        <i class="fa-solid fa-clock"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div id="content-scroll" class="flex-1 overflow-y-auto p-4 lg:p-8 scroll-smooth pb-32">
+                
+                <div id="view-dashboard" class="view-section space-y-8 max-w-7xl mx-auto">
+                    <div class="relative rounded-3xl overflow-hidden p-8 lg:p-12 text-white shadow-2xl">
+                        <div class="absolute inset-0 bg-gradient-to-r from-brand-600 via-brand-800 to-dark-bg z-0"></div>
+                        <div class="absolute right-0 top-0 h-full w-1/2 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
+                        <div class="relative z-10">
+                            <h1 id="greeting" class="text-4xl font-black mb-2">Welcome back, Titan.</h1>
+                            <p id="daily-quote" class="text-brand-100 max-w-xl text-lg font-light italic">"Code is poetry written in logic."</p>
+                            <div class="mt-8 flex gap-4">
+                                <button onclick="app.pomo.startQuick()" class="px-6 py-3 bg-white text-brand-900 font-bold rounded-xl hover:scale-105 transition shadow-lg flex items-center gap-2"><i class="fa-solid fa-play"></i> Focus Now</button>
+                                <button onclick="app.ui.shareStats()" class="px-6 py-3 bg-white/10 backdrop-blur text-white font-bold rounded-xl hover:bg-white/20 transition flex items-center gap-2"><i class="fa-solid fa-share-nodes"></i> Flex Stats</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="glass p-6 rounded-2xl card-hover border-t-4 border-brand-500">
+                            <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">XP Gained</div>
+                            <div class="text-3xl font-black text-white" id="stat-xp">0</div>
+                            <div class="text-xs text-green-400 mt-2"><i class="fa-solid fa-arrow-trend-up"></i> Top 10%</div>
+                        </div>
+                        <div class="glass p-6 rounded-2xl card-hover border-t-4 border-cyber-pink">
+                            <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Topics Crushed</div>
+                            <div class="text-3xl font-black text-white" id="stat-topics">0</div>
+                            <div class="text-xs text-brand-400 mt-2">Keep grinding</div>
+                        </div>
+                        <div class="glass p-6 rounded-2xl card-hover border-t-4 border-cyber-blue">
+                            <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Focus Hours</div>
+                            <div class="text-3xl font-black text-white" id="stat-hours">0.0</div>
+                            <div class="text-xs text-slate-500 mt-2">Deep Work</div>
+                        </div>
+                        <div class="glass p-6 rounded-2xl card-hover border-t-4 border-yellow-500">
+                            <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Mistakes Logged</div>
+                            <div class="text-3xl font-black text-white" id="stat-mistakes">0</div>
+                            <div class="text-xs text-red-400 mt-2 cursor-pointer hover:underline" onclick="app.nav.go('mistakes')">Review Now</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2 glass p-6 rounded-3xl">
+                            <h3 class="font-bold text-white mb-6">Mastery Distribution</h3>
+                            <div class="h-64"><canvas id="mainChart"></canvas></div>
+                        </div>
+                        <div class="glass p-6 rounded-3xl relative overflow-hidden bg-gradient-to-br from-red-900/20 to-transparent border border-red-500/20">
+                            <div class="absolute -right-4 -top-4 text-9xl text-red-500/10"><i class="fa-solid fa-robot"></i></div>
+                            <h3 class="font-bold text-white mb-2 flex items-center gap-2"><i class="fa-solid fa-fire text-red-500"></i> AI Roast</h3>
+                            <p id="roast-msg" class="text-red-200 text-sm italic leading-relaxed">"I see you haven't touched Algorithms in 3 days. Do you enjoy being unemployed? Get to work."</p>
+                            <button onclick="app.ai.roastMe()" class="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/40 text-red-300 rounded-lg text-xs font-bold transition w-full">Roast Me Again</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-syllabus" class="view-section hidden space-y-6 max-w-5xl mx-auto">
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <h2 class="text-3xl font-black text-white">Syllabus Tracker</h2>
+                            <p class="text-slate-400">Track your journey to mastery.</p>
+                        </div>
+                        <div class="flex gap-2">
+                             <input type="text" id="search-topics" placeholder="Search..." class="bg-dark-bg border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-brand-500 outline-none transition">
+                        </div>
+                    </div>
+                    <div id="syllabus-container" class="space-y-4"></div>
+                </div>
+
+                <div id="view-kanban" class="view-section hidden h-full">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-3xl font-black text-white">Project Board</h2>
+                        <button onclick="app.kanban.addCard()" class="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-bold shadow-lg hover:bg-brand-500 transition"><i class="fa-solid fa-plus"></i> Add Task</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-[600px] overflow-x-auto">
+                        <div class="glass p-4 rounded-2xl flex flex-col h-full" id="col-todo">
+                            <h3 class="font-bold text-slate-400 uppercase text-xs mb-4 tracking-wider flex justify-between">To Do <span class="bg-white/10 px-2 rounded-full text-white" id="count-todo">0</span></h3>
+                            <div class="kanban-col flex-1 space-y-3 overflow-y-auto min-h-[100px]" data-status="todo"></div>
+                        </div>
+                        <div class="glass p-4 rounded-2xl flex flex-col h-full border-t-2 border-yellow-500" id="col-doing">
+                            <h3 class="font-bold text-yellow-500 uppercase text-xs mb-4 tracking-wider flex justify-between">In Progress <span class="bg-yellow-500/20 px-2 rounded-full text-yellow-400" id="count-doing">0</span></h3>
+                            <div class="kanban-col flex-1 space-y-3 overflow-y-auto min-h-[100px]" data-status="doing"></div>
+                        </div>
+                        <div class="glass p-4 rounded-2xl flex flex-col h-full border-t-2 border-green-500" id="col-done">
+                            <h3 class="font-bold text-green-500 uppercase text-xs mb-4 tracking-wider flex justify-between">Done <span class="bg-green-500/20 px-2 rounded-full text-green-400" id="count-done">0</span></h3>
+                            <div class="kanban-col flex-1 space-y-3 overflow-y-auto min-h-[100px]" data-status="done"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-shop" class="view-section hidden max-w-6xl mx-auto">
+                    <div class="text-center mb-12">
+                        <h2 class="text-4xl font-black text-white mb-2 neon-text">TITAN MARKETPLACE</h2>
+                        <p class="text-slate-400">Spend your hard-earned XP on cosmetic upgrades.</p>
+                        <div class="mt-6 inline-flex items-center gap-3 px-6 py-3 bg-yellow-500/10 border border-yellow-500/30 rounded-full text-yellow-400 font-mono text-xl font-bold">
+                            <i class="fa-solid fa-coins"></i> <span id="shop-balance">0</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="shop-grid">
+                        </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="pomo-overlay" class="fixed inset-0 z-[200] bg-dark-bg/95 backdrop-blur-2xl flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <button onclick="app.ui.togglePomo()" class="absolute top-8 right-8 text-white/50 hover:text-white text-3xl transition"><i class="fa-solid fa-times"></i></button>
+        <div class="text-center w-full max-w-2xl px-4">
+            <div class="mb-8">
+                <span id="pomo-mode" class="px-4 py-1 rounded-full bg-brand-500/20 text-brand-400 text-xs font-bold uppercase tracking-widest border border-brand-500/30">Focus Mode</span>
+            </div>
+            <div class="relative w-80 h-80 mx-auto mb-12">
+                <svg class="w-full h-full transform -rotate-90">
+                    <circle cx="160" cy="160" r="140" stroke="rgba(255,255,255,0.05)" stroke-width="12" fill="none"></circle>
+                    <circle id="timer-ring" cx="160" cy="160" r="140" stroke="#6366f1" stroke-width="12" fill="none" stroke-dasharray="879" stroke-dashoffset="0" class="transition-all duration-1000 ease-linear" stroke-linecap="round"></circle>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center flex-col">
+                    <span id="timer-display" class="text-7xl font-mono font-bold text-white tracking-tighter neon-text">25:00</span>
+                </div>
+            </div>
+            <div class="flex justify-center gap-6 mb-12">
+                <button onclick="app.pomo.toggle()" id="pomo-btn" class="w-20 h-20 rounded-full bg-white text-dark-bg text-3xl flex items-center justify-center hover:scale-110 transition shadow-[0_0_30px_rgba(255,255,255,0.3)]"><i class="fa-solid fa-play ml-1"></i></button>
+                <button onclick="app.pomo.reset()" class="w-20 h-20 rounded-full bg-white/10 text-white text-2xl flex items-center justify-center hover:bg-white/20 transition backdrop-blur"><i class="fa-solid fa-rotate-left"></i></button>
+            </div>
+            <div class="grid grid-cols-3 gap-4 max-w-sm mx-auto">
+                <button onclick="app.pomo.setMode('focus')" class="p-3 rounded-xl bg-brand-600/20 text-brand-400 hover:bg-brand-600 hover:text-white transition font-bold text-sm">Focus</button>
+                <button onclick="app.pomo.setMode('short')" class="p-3 rounded-xl bg-green-500/20 text-green-400 hover:bg-green-600 hover:text-white transition font-bold text-sm">Short</button>
+                <button onclick="app.pomo.setMode('long')" class="p-3 rounded-xl bg-blue-500/20 text-blue-400 hover:bg-blue-600 hover:text-white transition font-bold text-sm">Long</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[300] flex flex-col gap-3 pointer-events-none"></div>
+
+    <script>
+        // --- 1. CONFIG & DATA ---
+        const config = {
+            firebase: {
+                // REPLACE WITH YOUR KEYS
+                apiKey: "AIzaSyDrgpLSWCTW1Qgh4ZG6qOoBUbFRgcY0gyM",
+                authDomain: "pg-dac-tracker.firebaseapp.com",
+                projectId: "pg-dac-tracker",
+                storageBucket: "pg-dac-tracker.firebasestorage.app",
+                messagingSenderId: "765871263616",
+                appId: "1:765871263616:web:b3eabf3ab2887414d57b65"
+            },
+            syllabus: [
+                { id: "core", title: "Core Java", topics: ["OOPs", "Collections", "Streams", "Multithreading", "JVM Internals"] },
+                { id: "algo", title: "DSA (Java)", topics: ["Arrays & Strings", "Linked Lists", "Stacks/Queues", "Trees/Graphs", "DP"] },
+                { id: "web", title: "Web Dev", topics: ["HTML5/CSS3", "JS ES6+", "React Hooks", "Tailwind CSS", "Redux"] },
+                { id: "back", title: "Backend", topics: ["Node.js", "Express", "REST APIs", "MongoDB", "SQL Joins"] },
+                { id: "devops", title: "DevOps", topics: ["Git/GitHub", "Docker", "CI/CD", "Linux Basics", "AWS EC2"] }
+            ],
+            quotes: [
+                "Discipline is choosing between what you want now and what you want most.",
+                "Don't decrease the goal. Increase the effort.",
+                "Your future self is watching you right now through memories.",
+                "Focus. Grind. Repeat."
+            ],
+            shopItems: [
+                { id: "theme_cyber", name: "Cyberpunk Theme", cost: 500, icon: "fa-robot", color: "text-pink-400" },
+                { id: "theme_gold", name: "Midas Touch", cost: 1000, icon: "fa-crown", color: "text-yellow-400" },
+                { id: "mode_hardcore", name: "Hardcore Mode", cost: 2000, icon: "fa-skull", color: "text-red-500" }
+            ]
+        };
+
+        // --- 2. STATE MANAGEMENT ---
+        const state = {
+            user: null,
+            data: {
+                xp: 0,
+                coins: 0,
+                streak: 0,
+                completed: {}, // "topic_id": date
+                kanban: [],
+                mistakes: [],
+                inventory: []
+            },
+            pomo: { time: 1500, max: 1500, active: false, interval: null, mode: 'focus' },
+            audio: {
+                click: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'], volume: 0.2 }),
+                success: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3'], volume: 0.5 }),
+                bg: null
+            }
+        };
+
+        // --- 3. APP MODULES ---
+        const app = {
+            init: () => {
+                firebase.initializeApp(config.firebase);
+                app.auth.listener();
+                
+                // Offline Persistence
+                firebase.firestore().enablePersistence().catch(console.error);
+                
+                // UI Inits
+                app.ui.renderSyllabus();
+                app.ui.renderShop();
+                app.chart.init();
+            },
+
+            // --- AUTHENTICATION ---
+            auth: {
+                listener: () => {
+                    firebase.auth().onAuthStateChanged(u => {
+                        if (u) {
+                            state.user = u;
+                            document.getElementById('auth-screen').classList.add('hidden');
+                            document.getElementById('app-container').classList.remove('hidden');
+                            setTimeout(() => document.getElementById('app-container').classList.remove('opacity-0'), 100);
+                            
+                            document.getElementById('user-name').innerText = u.displayName;
+                            document.getElementById('user-avatar').src = u.photoURL;
+                            app.db.load();
+                        }
+                    });
+                },
+                signIn: () => {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    firebase.auth().signInWithPopup(provider);
+                },
+                signOut: () => firebase.auth().signOut().then(() => location.reload())
+            },
+
+            // --- DATABASE SYNC ---
+            db: {
+                load: async () => {
+                    const doc = await firebase.firestore().collection('users').doc(state.user.uid).get();
+                    if (doc.exists) {
+                        state.data = { ...state.data, ...doc.data() };
+                    }
+                    app.ui.refreshAll();
+                    app.kanban.render();
+                },
+                save: () => {
+                    if (state.user) {
+                        firebase.firestore().collection('users').doc(state.user.uid).set(state.data, { merge: true });
+                    }
+                }
+            },
+
+            // --- NAVIGATION ---
+            nav: {
+                go: (viewId) => {
+                    document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                    document.getElementById(`view-${viewId}`).classList.remove('hidden');
+                    
+                    document.querySelectorAll('.nav-btn').forEach(b => {
+                        b.classList.remove('bg-brand-500/10', 'text-brand-400');
+                        b.classList.add('text-slate-400');
+                    });
+                    event.currentTarget.classList.add('bg-brand-500/10', 'text-brand-400');
+                    
+                    document.getElementById('page-title').innerText = viewId.charAt(0).toUpperCase() + viewId.slice(1);
+                    state.audio.click.play();
+                }
+            },
+
+            // --- LOGIC: XP & GAMIFICATION ---
+            game: {
+                addXP: (amount) => {
+                    state.data.xp += amount;
+                    state.data.coins += Math.floor(amount / 2);
+                    app.ui.toast(`+${amount} XP`, 'success');
+                    app.db.save();
+                    app.ui.refreshAll();
+                },
+                completeTopic: (id, checkEl) => {
+                    if (checkEl.checked) {
+                        state.data.completed[id] = new Date().toISOString();
+                        app.game.addXP(100);
+                        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#6366f1', '#f472b6'] });
+                        state.audio.success.play();
+                    } else {
+                        delete state.data.completed[id];
+                        state.data.xp -= 100; // Penalty
+                    }
+                    app.chart.update();
+                    app.db.save();
+                }
+            },
+
+            // --- POMODORO ---
+            pomo: {
+                toggle: () => {
+                    if (state.pomo.active) {
+                        clearInterval(state.pomo.interval);
+                        document.getElementById('pomo-btn').innerHTML = '<i class="fa-solid fa-play ml-1"></i>';
+                    } else {
+                        state.pomo.interval = setInterval(() => {
+                            state.pomo.time--;
+                            app.pomo.renderTime();
+                            if (state.pomo.time <= 0) {
+                                clearInterval(state.pomo.interval);
+                                state.audio.success.play();
+                                app.game.addXP(200); // Bonus for focus
+                                app.ui.toast("Session Complete! +200 XP", 'success');
+                            }
+                        }, 1000);
+                        document.getElementById('pomo-btn').innerHTML = '<i class="fa-solid fa-pause"></i>';
+                    }
+                    state.pomo.active = !state.pomo.active;
+                },
+                renderTime: () => {
+                    const m = Math.floor(state.pomo.time / 60).toString().padStart(2, '0');
+                    const s = (state.pomo.time % 60).toString().padStart(2, '0');
+                    document.getElementById('timer-display').innerText = `${m}:${s}`;
+                    
+                    const total = state.pomo.max;
+                    const pct = (state.pomo.time / total) * 879;
+                    document.getElementById('timer-ring').style.strokeDashoffset = 879 - pct;
+                },
+                setMode: (mode) => {
+                    state.pomo.mode = mode;
+                    state.pomo.time = mode === 'focus' ? 1500 : mode === 'short' ? 300 : 900;
+                    state.pomo.max = state.pomo.time;
+                    document.getElementById('pomo-mode').innerText = mode + " mode";
+                    app.pomo.renderTime();
+                },
+                startQuick: () => {
+                    app.ui.togglePomo();
+                    app.pomo.setMode('focus');
+                    setTimeout(app.pomo.toggle, 500);
+                },
+                reset: () => {
+                    clearInterval(state.pomo.interval);
+                    state.pomo.active = false;
+                    state.pomo.time = state.pomo.max;
+                    app.pomo.renderTime();
+                    document.getElementById('pomo-btn').innerHTML = '<i class="fa-solid fa-play ml-1"></i>';
+                }
+            },
+
+            // --- UI RENDERING ---
+            ui: {
+                refreshAll: () => {
+                    // Update Stats
+                    document.getElementById('stat-xp').innerText = state.data.xp.toLocaleString();
+                    document.getElementById('coin-display').innerText = state.data.coins.toLocaleString();
+                    document.getElementById('shop-balance').innerText = state.data.coins.toLocaleString();
+                    document.getElementById('stat-topics').innerText = Object.keys(state.data.completed).length;
+                    
+                    // Update Rank
+                    const xp = state.data.xp;
+                    let rank = "Novice";
+                    if(xp > 1000) rank = "Apprentice";
+                    if(xp > 5000) rank = "Adept";
+                    if(xp > 10000) rank = "Expert";
+                    if(xp > 20000) rank = "Titan";
+                    document.getElementById('user-rank').innerText = rank;
+                    
+                    app.chart.update();
+                },
+                renderSyllabus: () => {
+                    const container = document.getElementById('syllabus-container');
+                    config.syllabus.forEach(sub => {
+                        let html = `<div class="glass p-5 rounded-2xl border border-white/5">
+                            <h3 class="font-bold text-white mb-4 text-lg border-b border-white/5 pb-2">${sub.title}</h3>
+                            <div class="space-y-3">`;
+                        
+                        sub.topics.forEach((t, i) => {
+                            const id = `${sub.id}_${i}`;
+                            const isDone = state.data.completed && state.data.completed[id];
+                            html += `<label class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 cursor-pointer transition group">
+                                <div class="relative">
+                                    <input type="checkbox" class="peer sr-only" onchange="app.game.completeTopic('${id}', this)" ${isDone ? 'checked' : ''}>
+                                    <div class="w-6 h-6 border-2 border-slate-600 rounded-lg peer-checked:bg-brand-500 peer-checked:border-brand-500 transition-all flex items-center justify-center text-white opacity-50 peer-checked:opacity-100">
+                                        <i class="fa-solid fa-check text-xs transform scale-0 peer-checked:scale-100 transition"></i>
+                                    </div>
+                                </div>
+                                <span class="text-sm text-slate-400 group-hover:text-white transition ${isDone ? 'line-through opacity-50' : ''}">${t}</span>
+                            </label>`;
+                        });
+                        html += `</div></div>`;
+                        container.innerHTML += html;
+                    });
+                },
+                renderShop: () => {
+                    const grid = document.getElementById('shop-grid');
+                    config.shopItems.forEach(item => {
+                        grid.innerHTML += `
+                        <div class="glass p-6 rounded-2xl flex flex-col items-center text-center border hover:border-brand-500 transition group relative overflow-hidden">
+                            <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 text-2xl ${item.color} group-hover:scale-110 transition">
+                                <i class="fa-solid ${item.icon}"></i>
+                            </div>
+                            <h4 class="font-bold text-white mb-1">${item.name}</h4>
+                            <p class="text-yellow-400 font-mono text-sm mb-4"><i class="fa-solid fa-coins"></i> ${item.cost}</p>
+                            <button onclick="app.game.buy('${item.id}', ${item.cost})" class="px-6 py-2 bg-white/10 hover:bg-brand-600 text-white rounded-lg text-sm font-bold transition w-full">Purchase</button>
+                        </div>`;
+                    });
+                },
+                togglePomo: () => {
+                    const el = document.getElementById('pomo-overlay');
+                    if (el.classList.contains('hidden')) {
+                        el.classList.remove('hidden');
+                        setTimeout(() => el.classList.remove('opacity-0'), 10);
+                    } else {
+                        el.classList.add('opacity-0');
+                        setTimeout(() => el.classList.add('hidden'), 300);
+                    }
+                },
+                toggleZen: () => {
+                    document.body.classList.toggle('zen-mode');
+                    const isZen = document.body.classList.contains('zen-mode');
+                    app.ui.toast(isZen ? "Zen Mode Activated" : "Zen Mode Disabled", "info");
+                    // Simple Zen impl: hide sidebar
+                    document.querySelector('aside').classList.toggle('hidden');
+                },
+                toast: (msg, type = 'info') => {
+                    const c = document.getElementById('toast-container');
+                    const t = document.createElement('div');
+                    const colors = { success: 'bg-green-500', error: 'bg-red-500', info: 'bg-brand-600' };
+                    t.className = `px-6 py-3 rounded-xl text-white font-bold shadow-2xl flex items-center gap-3 transform translate-y-10 opacity-0 transition-all duration-300 ${colors[type]}`;
+                    t.innerHTML = `<i class="fa-solid fa-bell"></i> ${msg}`;
+                    c.appendChild(t);
+                    requestAnimationFrame(() => { t.classList.remove('translate-y-10', 'opacity-0'); });
+                    setTimeout(() => { t.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => t.remove(), 300); }, 3000);
+                },
+                shareStats: () => {
+                    app.ui.toast("Generating Flex Card...", "info");
+                    // Use html2canvas on the dashboard (simplified)
+                    html2canvas(document.querySelector('#view-dashboard')).then(canvas => {
+                        const link = document.createElement('a');
+                        link.download = 'titan-stats.png';
+                        link.href = canvas.toDataURL();
+                        link.click();
+                        app.game.addXP(50); // Social bonus
+                    });
+                }
+            },
+
+            // --- AUDIO ENGINE ---
+            audio: {
+                togglePlayer: () => {
+                    document.getElementById('mini-player').classList.toggle('hidden');
+                },
+                playTrack: (type) => {
+                    if (state.audio.bg) state.audio.bg.stop();
+                    let src = '';
+                    if (type === 'rain') src = 'https://assets.mixkit.co/active_storage/sfx/1138/1138-preview.mp3'; // Placeholder URLs
+                    if (type === 'cafe') src = 'https://assets.mixkit.co/active_storage/sfx/1136/1136-preview.mp3';
+                    
+                    if (src) {
+                        state.audio.bg = new Howl({ src: [src], loop: true, volume: 0.5 });
+                        state.audio.bg.play();
+                        app.ui.toast(`Playing: ${type}`, 'info');
+                    }
+                },
+                setVolume: (val) => {
+                    if (state.audio.bg) state.audio.bg.volume(val / 100);
+                }
+            },
+
+            // --- AI ROAST & LOGIC ---
+            ai: {
+                roastMe: () => {
+                    const msgs = [
+                        "I calculated your potential. It returned null.",
+                        "Are you coding or just staring at the dark mode?",
+                        "That streak is shorter than your attention span.",
+                        "Titan? More like Tiny.",
+                        "Even ChatGPT writes better code than you."
+                    ];
+                    const msg = msgs[Math.floor(Math.random() * msgs.length)];
+                    document.getElementById('roast-msg').innerText = `"${msg}"`;
+                }
+            },
+
+            // --- KANBAN ---
+            kanban: {
+                render: () => {
+                    // Re-render columns based on state.data.kanban
+                    // Simplified for this demo:
+                    ['todo', 'doing', 'done'].forEach(status => {
+                        const col = document.querySelector(`.kanban-col[data-status="${status}"]`);
+                        col.innerHTML = '';
+                        state.data.kanban.filter(k => k.status === status).forEach(k => {
+                            const el = document.createElement('div');
+                            el.className = 'bg-dark-card p-3 rounded-lg border border-white/5 cursor-move shadow-sm text-sm text-white font-medium';
+                            el.innerText = k.text;
+                            el.draggable = true;
+                            col.appendChild(el);
+                        });
+                        document.getElementById(`count-${status}`).innerText = state.data.kanban.filter(k => k.status === status).length;
+                    });
+                    app.kanban.initDrag();
+                },
+                addCard: () => {
+                    const text = prompt("Task Name:");
+                    if (text) {
+                        state.data.kanban.push({ id: Date.now(), text, status: 'todo' });
+                        app.db.save();
+                        app.kanban.render();
+                    }
+                },
+                initDrag: () => {
+                    document.querySelectorAll('.kanban-col').forEach(el => {
+                        new Sortable(el, {
+                            group: 'kanban',
+                            animation: 150,
+                            onEnd: (evt) => {
+                                const itemText = evt.item.innerText;
+                                const newStatus = evt.to.dataset.status;
+                                const item = state.data.kanban.find(i => i.text === itemText);
+                                if (item) {
+                                    item.status = newStatus;
+                                    app.db.save();
+                                    // Update counts
+                                    app.kanban.render(); 
+                                }
+                            }
+                        });
+                    });
+                }
+            },
+
+            // --- CHARTS ---
+            chart: {
+                instance: null,
+                init: () => {
+                    const ctx = document.getElementById('mainChart').getContext('2d');
+                    app.chart.instance = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Mastered', 'Remaining'],
+                            datasets: [{
+                                data: [0, 100],
+                                backgroundColor: ['#6366f1', '#1f2937'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: { cutout: '70%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    });
+                },
+                update: () => {
+                    if (!app.chart.instance) return;
+                    let total = 0;
+                    config.syllabus.forEach(s => total += s.topics.length);
+                    const done = Object.keys(state.data.completed || {}).length;
+                    
+                    app.chart.instance.data.datasets[0].data = [done, total - done];
+                    app.chart.instance.update();
+                }
+            }
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', app.init);
+    </script>
+</body>
+</html>
