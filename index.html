@@ -3,32 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TITAN OS | Ultimate Tracker</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f172a">
-
+    <title>TITAN NEXUS | The Flow State</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script> 
     
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tilt.js/1.2.1/tilt.jquery.min.js"></script> <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Outfit', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    fontFamily: { sans: ['Outfit', 'sans-serif'], display: ['Space Grotesk', 'sans-serif'] },
                     colors: {
-                        brand: { 50: 'var(--c-50)', 500: 'var(--c-500)', 600: 'var(--c-600)', 900: 'var(--c-900)' },
-                        dark: { bg: '#0b0f19', card: '#111827' }
+                        neon: { blue: '#00f3ff', purple: '#bc13fe', pink: '#ff0055' },
+                        void: '#050505',
+                        glass: 'rgba(255, 255, 255, 0.03)'
+                    },
+                    backgroundImage: {
+                        'aurora': 'linear-gradient(125deg, #000000 0%, #1a0b2e 50%, #000000 100%)',
+                        'glass-gradient': 'linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 100%)'
                     }
                 }
             }
@@ -36,482 +35,417 @@
     </script>
 
     <style>
-        :root { --c-50: #eef2ff; --c-500: #6366f1; --c-600: #4f46e5; --c-900: #312e81; }
+        body { background-color: #050505; color: #fff; overflow-x: hidden; cursor: none; } /* Hide default cursor */
         
-        /* THEMES */
-        body.theme-cyber { --c-50: #fdf2f8; --c-500: #ec4899; --c-600: #db2777; --c-900: #831843; } /* Pink */
-        body.theme-gold { --c-50: #fffbeb; --c-500: #f59e0b; --c-600: #d97706; --c-900: #78350f; } /* Gold */
-        body.theme-hacker { --c-50: #f0fdf4; --c-500: #22c55e; --c-600: #16a34a; --c-900: #14532d; } /* Green */
-        body.theme-blood { --c-50: #fef2f2; --c-500: #ef4444; --c-600: #dc2626; --c-900: #7f1d1d; } /* Red */
+        /* CUSTOM CURSOR */
+        #cursor-dot, #cursor-outline { position: fixed; top: 0; left: 0; transform: translate(-50%, -50%); border-radius: 50%; z-index: 9999; pointer-events: none; }
+        #cursor-dot { width: 8px; height: 8px; background: #00f3ff; }
+        #cursor-outline { width: 40px; height: 40px; border: 1px solid rgba(0, 243, 255, 0.5); transition: width 0.2s, height 0.2s; }
+        
+        /* GLASSMORPHISM 2.0 */
+        .nexus-card {
+            background: rgba(20, 20, 20, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .nexus-card:hover {
+            border-color: rgba(0, 243, 255, 0.3);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.1);
+        }
 
-        body { font-family: 'Outfit', sans-serif; overflow-x: hidden; }
-        .glass { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .glass-input { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; }
+        /* TEXT GLOW */
+        .glow-text { text-shadow: 0 0 20px rgba(0, 243, 255, 0.6); }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00f3ff; }
+
+        /* MESH GRADIENT ANIMATION */
+        .mesh-bg {
+            position: fixed; inset: 0; z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #1a0b2e 0%, #000000 100%);
+        }
+        .orb {
+            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4;
+            animation: float 10s infinite ease-in-out;
+        }
+        @keyframes float { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(30px, -50px); } }
+
+        /* NAV LINK HOVER */
+        .nav-link { position: relative; }
+        .nav-link::after {
+            content: ''; position: absolute; width: 0; height: 2px; bottom: -4px; left: 0;
+            background: #00f3ff; transition: width 0.3s;
+        }
+        .nav-link:hover::after { width: 100%; }
         
-        /* Utils */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }
-        .neon-text { text-shadow: 0 0 10px rgba(99, 102, 241, 0.5); }
+        /* 3D MAP NODES */
+        .node { transition: all 0.3s; }
+        .node:hover { transform: scale(1.2); filter: drop-shadow(0 0 10px #00f3ff); }
+        .connector { stroke-dasharray: 100; stroke-dashoffset: 100; animation: dash 2s forwards; }
+        @keyframes dash { to { stroke-dashoffset: 0; } }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-dark-bg text-slate-800 dark:text-slate-200 transition-colors duration-300">
+<body class="font-sans antialiased selection:bg-neon-blue selection:text-black">
 
-    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-0 left-1/4 w-96 h-96 bg-brand-500/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+    <div id="cursor-dot"></div>
+    <div id="cursor-outline"></div>
+
+    <div class="mesh-bg">
+        <div class="orb w-96 h-96 bg-neon-purple/30 top-0 left-0"></div>
+        <div class="orb w-[500px] h-[500px] bg-blue-900/20 bottom-0 right-0 animation-delay-2000"></div>
     </div>
 
-    <div id="auth-screen" class="fixed inset-0 z-[100] bg-dark-bg/95 backdrop-blur-xl flex items-center justify-center">
-        <div class="glass p-10 rounded-3xl w-full max-w-md text-center">
-            <div class="w-20 h-20 bg-brand-600 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-2xl shadow-brand-500/50">
-                <i class="fa-solid fa-fingerprint text-4xl text-white"></i>
-            </div>
-            <h1 class="text-5xl font-black mb-2 text-white">TITAN<span class="text-brand-500">OS</span></h1>
-            <button onclick="app.auth.signIn()" class="w-full py-4 mt-8 bg-white text-slate-900 font-bold rounded-xl hover:scale-[1.02] transition shadow-lg flex items-center justify-center gap-3">
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5"> Sign In with Google
-            </button>
-        </div>
-    </div>
+    <div class="flex h-screen overflow-hidden relative">
 
-    <div id="app-container" class="relative z-10 flex h-screen overflow-hidden hidden opacity-0 transition-opacity duration-1000">
-        
-        <aside class="w-20 lg:w-72 bg-dark-card/60 backdrop-blur-xl border-r border-white/5 flex flex-col z-50 transition-all" id="sidebar">
-            <div class="p-6 border-b border-white/5 flex items-center gap-4">
-                <img id="user-avatar" src="" class="w-12 h-12 rounded-xl ring-2 ring-brand-500/50">
-                <div class="hidden lg:block">
-                    <h3 id="user-name" class="font-bold text-white text-sm truncate">User</h3>
-                    <p class="text-[10px] text-brand-500 font-mono uppercase">System Online</p>
-                </div>
+        <aside class="w-20 lg:w-24 h-screen border-r border-white/5 flex flex-col items-center py-8 z-50 glass" style="background: rgba(0,0,0,0.6);">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-neon-blue to-neon-purple flex items-center justify-center mb-12 shadow-[0_0_20px_rgba(0,243,255,0.4)] cursor-pointer hover:rotate-12 transition-transform duration-500">
+                <i class="fa-solid fa-cube text-white text-xl"></i>
             </div>
-            <nav class="flex-1 p-3 space-y-2 overflow-y-auto">
-                <button onclick="app.nav.go('dashboard')" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-brand-500/10 hover:text-brand-500 transition active"><i class="fa-solid fa-grid-2 w-6"></i> <span class="hidden lg:block">Dashboard</span></button>
-                <button onclick="app.nav.go('syllabus')" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-brand-500/10 hover:text-brand-500 transition"><i class="fa-solid fa-list-check w-6"></i> <span class="hidden lg:block">Syllabus</span></button>
-                <button onclick="app.nav.go('kanban')" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-brand-500/10 hover:text-brand-500 transition"><i class="fa-solid fa-columns w-6"></i> <span class="hidden lg:block">Kanban</span></button>
-                <button onclick="app.nav.go('shop')" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-brand-500/10 hover:text-yellow-400 transition"><i class="fa-solid fa-store w-6"></i> <span class="hidden lg:block">Shop</span></button>
+
+            <nav class="flex-1 space-y-8 flex flex-col items-center w-full">
+                <button onclick="app.nav.switch('dashboard')" class="nav-btn group relative w-12 h-12 flex items-center justify-center rounded-2xl hover:bg-white/10 transition-all text-slate-400 hover:text-white active">
+                    <i class="fa-solid fa-layer-group text-xl transition-transform group-hover:scale-110"></i>
+                    <span class="absolute left-14 bg-white text-black text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Dashboard</span>
+                </button>
+                <button onclick="app.nav.switch('constellation')" class="nav-btn group relative w-12 h-12 flex items-center justify-center rounded-2xl hover:bg-white/10 transition-all text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-network-wired text-xl transition-transform group-hover:scale-110"></i>
+                    <span class="absolute left-14 bg-white text-black text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Constellation</span>
+                </button>
+                <button onclick="app.nav.switch('arena')" class="nav-btn group relative w-12 h-12 flex items-center justify-center rounded-2xl hover:bg-white/10 transition-all text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-gamepad text-xl transition-transform group-hover:scale-110"></i>
+                    <span class="absolute left-14 bg-white text-black text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">The Arena</span>
+                </button>
             </nav>
-            <div class="p-4 border-t border-white/5">
-                <button onclick="app.auth.signOut()" class="w-full p-3 rounded-xl hover:bg-red-500/10 text-red-400 flex items-center justify-center gap-2"><i class="fa-solid fa-power-off"></i> <span class="hidden lg:block text-xs font-bold">LOGOUT</span></button>
-            </div>
+
+            <button onclick="app.ui.toggleZen()" class="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-slate-500 hover:text-neon-pink hover:border-neon-pink transition-colors">
+                <i class="fa-solid fa-power-off"></i>
+            </button>
         </aside>
 
-        <main class="flex-1 flex flex-col relative">
-            <header class="h-16 border-b border-white/5 bg-dark-bg/80 backdrop-blur px-6 flex justify-between items-center z-40">
-                <h2 id="page-title" class="text-xl font-bold text-white">Dashboard</h2>
-                <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-2 px-3 py-1 bg-yellow-500/10 rounded-lg text-yellow-400 border border-yellow-500/20">
-                        <i class="fa-solid fa-coins"></i> <span id="coin-display" class="font-mono font-bold">0</span>
+        <main class="flex-1 relative overflow-y-auto overflow-x-hidden scroll-smooth" id="main-scroll">
+            
+            <header class="h-24 flex items-center justify-between px-8 lg:px-12 sticky top-0 z-40 backdrop-blur-md">
+                <div>
+                    <h2 class="font-display text-3xl font-bold text-white tracking-tight">Welcome, <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon-blue to-neon-purple animate-pulse">Titan</span></h2>
+                    <p class="text-sm text-slate-400">System Status: <span class="text-green-400">OPTIMAL</span></p>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="hidden md:flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/10">
+                        <div class="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+                        <span class="text-xs font-mono text-slate-300">LIVE FEED: <span id="live-user">Alex finished 'Java OOP'</span></span>
                     </div>
-                    <button onclick="app.ui.togglePomo()" class="w-10 h-10 rounded-full bg-brand-600 text-white shadow-lg shadow-brand-500/40 hover:scale-110 transition"><i class="fa-solid fa-clock"></i></button>
+                    <button onclick="app.pomo.toggle()" class="w-12 h-12 rounded-full bg-gradient-to-r from-neon-purple to-neon-pink flex items-center justify-center shadow-[0_0_20px_rgba(188,19,254,0.5)] hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-bolt text-white text-xl"></i>
+                    </button>
                 </div>
             </header>
 
-            <div id="content-scroll" class="flex-1 overflow-y-auto p-4 lg:p-8 scroll-smooth pb-32">
+            <div id="view-dashboard" class="p-8 lg:p-12 space-y-12 view-section">
                 
-                <div id="view-dashboard" class="view-section space-y-8 max-w-7xl mx-auto">
-                    <div class="relative rounded-3xl overflow-hidden p-10 text-white shadow-2xl bg-gradient-to-r from-brand-600 to-brand-900">
-                        <h1 class="text-4xl font-black mb-2">Welcome Back.</h1>
-                        <p class="text-brand-100 italic">"Consistancy is the only currency that matters."</p>
-                        <div class="mt-6 flex gap-4">
-                            <button onclick="app.pomo.startQuick()" class="px-6 py-2 bg-white text-brand-900 font-bold rounded-lg shadow-lg">Focus Now</button>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="nexus-card p-8 rounded-3xl relative overflow-hidden group" data-tilt data-tilt-max="10" data-tilt-glare data-tilt-max-glare="0.5">
+                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-neon-blue/20 rounded-full blur-3xl group-hover:bg-neon-blue/40 transition-colors"></div>
+                        <p class="font-display text-sm text-slate-400 uppercase tracking-widest mb-2">Total XP</p>
+                        <h3 class="font-display text-5xl font-bold text-white mb-2 counter" data-target="12450">0</h3>
+                        <div class="w-full bg-white/10 h-1 mt-4 rounded-full overflow-hidden">
+                            <div class="h-full bg-neon-blue w-[70%] shadow-[0_0_10px_#00f3ff]"></div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div class="glass p-6 rounded-2xl border-t-4 border-brand-500"><p class="text-xs text-slate-400 font-bold uppercase">XP Gained</p><h3 class="text-3xl font-black text-white" id="stat-xp">0</h3></div>
-                        <div class="glass p-6 rounded-2xl border-t-4 border-green-500"><p class="text-xs text-slate-400 font-bold uppercase">Topics Done</p><h3 class="text-3xl font-black text-white" id="stat-topics">0</h3></div>
+
+                    <div class="nexus-card p-8 rounded-3xl relative overflow-hidden group" data-tilt data-tilt-max="10">
+                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-neon-purple/20 rounded-full blur-3xl group-hover:bg-neon-purple/40 transition-colors"></div>
+                        <p class="font-display text-sm text-slate-400 uppercase tracking-widest mb-2">Current Streak</p>
+                        <h3 class="font-display text-5xl font-bold text-white mb-2 counter" data-target="14">0</h3>
+                        <p class="text-xs text-neon-purple font-mono">DAYS OF GLORY</p>
                     </div>
-                     <div class="glass p-6 rounded-2xl">
-                        <h3 class="font-bold text-white mb-4">Mastery Progress</h3>
-                        <div class="h-64"><canvas id="mainChart"></canvas></div>
+
+                    <div class="nexus-card p-8 rounded-3xl relative overflow-hidden group border-neon-pink/30" data-tilt data-tilt-max="10">
+                        <div class="absolute inset-0 bg-gradient-to-br from-neon-pink/10 to-transparent"></div>
+                        <div class="flex justify-between items-center h-full relative z-10">
+                            <div>
+                                <p class="font-display text-sm text-slate-400 uppercase tracking-widest mb-2">Focus Mode</p>
+                                <button onclick="app.pomo.toggle()" class="mt-2 px-6 py-3 bg-neon-pink hover:bg-pink-600 text-white font-bold rounded-xl shadow-[0_0_20px_rgba(255,0,85,0.4)] transition-all">ENGAGE</button>
+                            </div>
+                            <i class="fa-solid fa-headset text-6xl text-white/10"></i>
+                        </div>
                     </div>
                 </div>
 
-                <div id="view-syllabus" class="view-section hidden max-w-5xl mx-auto space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-3xl font-black text-white">Syllabus</h2>
-                        <button onclick="app.syllabus.toggleReorder()" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm border border-white/10 hover:bg-brand-600 transition"><i class="fa-solid fa-sort"></i> Reorder Subjects</button>
-                    </div>
-                    <div id="syllabus-container" class="space-y-4"></div>
+                <div>
+                    <h3 class="font-display text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                        <span class="w-1 h-8 bg-neon-blue rounded-full"></span> Mission Status
+                    </h3>
+                    <div class="space-y-4" id="syllabus-list">
+                        </div>
                 </div>
-
-                <div id="view-kanban" class="view-section hidden h-full">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-3xl font-black text-white">Kanban</h2>
-                        <button onclick="app.kanban.addCard()" class="px-4 py-2 bg-brand-600 text-white rounded-lg font-bold"><i class="fa-solid fa-plus"></i> Add Task</button>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-[600px] overflow-x-auto">
-                        <div class="glass p-4 rounded-2xl flex flex-col h-full"><h3 class="font-bold text-slate-400 uppercase text-xs mb-4">To Do</h3><div class="kanban-col flex-1 space-y-3 overflow-y-auto" data-status="todo"></div></div>
-                        <div class="glass p-4 rounded-2xl flex flex-col h-full border-t-2 border-brand-500"><h3 class="font-bold text-brand-500 uppercase text-xs mb-4">In Progress</h3><div class="kanban-col flex-1 space-y-3 overflow-y-auto" data-status="doing"></div></div>
-                        <div class="glass p-4 rounded-2xl flex flex-col h-full border-t-2 border-green-500"><h3 class="font-bold text-green-500 uppercase text-xs mb-4">Done</h3><div class="kanban-col flex-1 space-y-3 overflow-y-auto" data-status="done"></div></div>
-                    </div>
-                </div>
-
-                <div id="view-shop" class="view-section hidden max-w-6xl mx-auto">
-                    <div class="text-center mb-10">
-                        <h2 class="text-4xl font-black text-white neon-text">Titan Market</h2>
-                        <p class="text-slate-400">Spend coins on UI Themes.</p>
-                        <div class="mt-4 text-2xl font-mono text-yellow-400 font-bold"><i class="fa-solid fa-coins"></i> <span id="shop-balance">0</span></div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="shop-grid"></div>
-                </div>
-
             </div>
+
+            <div id="view-constellation" class="view-section hidden h-[calc(100vh-100px)] relative overflow-hidden">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <svg width="800" height="600" viewBox="0 0 800 600" id="network-svg" class="w-full h-full opacity-0 scale-90 transition-all duration-1000">
+                        <path d="M400,300 L200,150" stroke="rgba(255,255,255,0.1)" stroke-width="2" class="connector"></path>
+                        <path d="M400,300 L600,150" stroke="rgba(255,255,255,0.1)" stroke-width="2" class="connector"></path>
+                        <path d="M400,300 L200,450" stroke="rgba(255,255,255,0.1)" stroke-width="2" class="connector"></path>
+                        <path d="M400,300 L600,450" stroke="rgba(255,255,255,0.1)" stroke-width="2" class="connector"></path>
+                        
+                        <g class="node cursor-pointer group" onclick="app.ui.openNode('Core Java')">
+                            <circle cx="400" cy="300" r="40" fill="#0b0f19" stroke="#00f3ff" stroke-width="2" class="group-hover:fill-neon-blue/20 transition-all"></circle>
+                            <text x="400" y="305" text-anchor="middle" fill="white" font-family="Space Grotesk" font-size="12" font-weight="bold">CORE</text>
+                        </g>
+                        
+                        <g class="node cursor-pointer group" onclick="app.ui.openNode('Algorithms')">
+                            <circle cx="200" cy="150" r="30" fill="#0b0f19" stroke="#bc13fe" stroke-width="2" class="group-hover:fill-neon-purple/20 transition-all"></circle>
+                            <text x="200" y="155" text-anchor="middle" fill="white" font-family="Space Grotesk" font-size="10">DSA</text>
+                        </g>
+
+                        <g class="node cursor-pointer group" onclick="app.ui.openNode('Web Dev')">
+                            <circle cx="600" cy="150" r="30" fill="#0b0f19" stroke="#ff0055" stroke-width="2" class="group-hover:fill-neon-pink/20 transition-all"></circle>
+                            <text x="600" y="155" text-anchor="middle" fill="white" font-family="Space Grotesk" font-size="10">WEB</text>
+                        </g>
+                        
+                        </svg>
+                </div>
+            </div>
+
         </main>
     </div>
 
-    <div id="detail-modal" class="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center hidden">
-        <div class="glass bg-dark-card w-full max-w-lg rounded-3xl p-6 border border-white/10 shadow-2xl transform scale-100 transition-all">
-            <div class="flex justify-between items-start mb-6">
-                <div><span class="text-[10px] uppercase font-bold text-brand-500 tracking-wider">Edit Topic</span><h3 id="modal-title" class="text-2xl font-bold text-white">Topic Name</h3></div>
-                <button onclick="document.getElementById('detail-modal').classList.add('hidden')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-times text-xl"></i></button>
-            </div>
-            <div class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1">Difficulty</label>
-                        <select id="modal-difficulty" class="w-full p-3 rounded-xl glass-input outline-none"><option value="Easy">🟢 Easy</option><option value="Medium">🟡 Medium</option><option value="Hard">🔴 Hard</option></select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1">Time (Hrs)</label>
-                        <input type="number" id="modal-time" class="w-full p-3 rounded-xl glass-input outline-none">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1">Study Notes</label>
-                    <textarea id="modal-notes" rows="4" class="w-full p-3 rounded-xl glass-input resize-none outline-none" placeholder="Write your notes here..."></textarea>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1">Resource Link</label>
-                    <input type="text" id="modal-link" class="w-full p-3 rounded-xl glass-input outline-none" placeholder="https://...">
-                </div>
-                <button onclick="app.syllabus.saveDetails()" class="w-full py-3 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition shadow-lg mt-2">Save Details</button>
-            </div>
+    <div id="focus-overlay" class="fixed inset-0 z-[100] bg-black/90 backdrop-blur-3xl flex flex-col items-center justify-center hidden opacity-0 transition-opacity duration-500">
+        <div class="absolute top-10 right-10">
+            <button onclick="app.pomo.toggle()" class="text-white/50 hover:text-white transition text-xl"><i class="fa-solid fa-times"></i></button>
         </div>
+        
+        <div class="relative w-96 h-96 flex items-center justify-center">
+            <div class="absolute w-full h-full border border-neon-blue/20 rounded-full animate-ping" style="animation-duration: 3s;"></div>
+            <div class="absolute w-[80%] h-[80%] border border-neon-purple/20 rounded-full animate-ping" style="animation-duration: 3s; animation-delay: 1s;"></div>
+            
+            <h1 id="timer" class="font-display text-8xl font-bold text-white glow-text tabular-nums">25:00</h1>
+        </div>
+        
+        <div class="mt-12 flex gap-8">
+            <button class="px-8 py-3 rounded-full border border-white/20 text-white hover:bg-white hover:text-black transition font-bold tracking-widest" onclick="app.pomo.start()">START</button>
+            <button class="px-8 py-3 rounded-full border border-white/20 text-white hover:bg-white hover:text-black transition font-bold tracking-widest" onclick="app.pomo.reset()">RESET</button>
+        </div>
+        
+        <p class="mt-8 text-slate-500 font-mono text-xs uppercase tracking-[0.3em]">Zone Interaction Protocol</p>
     </div>
 
-    <div id="pomo-overlay" class="fixed inset-0 z-[200] bg-dark-bg/95 backdrop-blur-2xl flex items-center justify-center hidden">
-        <div class="text-center w-full max-w-md">
-            <button onclick="app.ui.togglePomo()" class="absolute top-8 right-8 text-white text-3xl"><i class="fa-solid fa-times"></i></button>
-            <div class="relative w-72 h-72 mx-auto mb-8">
-                <svg class="w-full h-full transform -rotate-90"><circle cx="144" cy="144" r="130" stroke="rgba(255,255,255,0.1)" stroke-width="8" fill="none"></circle><circle id="timer-ring" cx="144" cy="144" r="130" stroke="#6366f1" stroke-width="8" fill="none" stroke-dasharray="816" stroke-dashoffset="0" class="transition-all duration-1000"></circle></svg>
-                <div class="absolute inset-0 flex items-center justify-center"><span id="timer-display" class="text-6xl font-mono font-bold text-white">25:00</span></div>
+    <div id="node-modal" class="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm hidden flex items-center justify-center">
+        <div class="nexus-card w-full max-w-lg p-8 rounded-3xl transform scale-90 opacity-0 transition-all duration-300" id="node-card">
+            <h2 id="modal-title" class="text-3xl font-display font-bold text-white mb-4">Topic Title</h2>
+            <p class="text-slate-400 mb-6">Mastery of this node is required for system advancement.</p>
+            <div class="space-y-3 mb-8">
+                <div class="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/5 hover:border-neon-blue/50 transition cursor-pointer">
+                    <div class="w-8 h-8 rounded-full bg-neon-blue/20 flex items-center justify-center text-neon-blue"><i class="fa-solid fa-book"></i></div>
+                    <span class="text-sm font-bold">Read Documentation</span>
+                </div>
+                <div class="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/5 hover:border-neon-purple/50 transition cursor-pointer">
+                    <div class="w-8 h-8 rounded-full bg-neon-purple/20 flex items-center justify-center text-neon-purple"><i class="fa-solid fa-code"></i></div>
+                    <span class="text-sm font-bold">Practice Problem</span>
+                </div>
             </div>
-            <button onclick="app.pomo.toggle()" id="pomo-btn" class="w-20 h-20 rounded-full bg-white text-brand-900 text-3xl hover:scale-110 transition"><i class="fa-solid fa-play ml-1"></i></button>
+            <button onclick="app.ui.closeNode()" class="w-full py-3 bg-white text-black font-bold rounded-xl hover:scale-[1.02] transition">CLOSE LINK</button>
         </div>
     </div>
 
     <script>
-        const config = {
-            firebase: {
-                apiKey: "AIzaSyDrgpLSWCTW1Qgh4ZG6qOoBUbFRgcY0gyM",
-                authDomain: "pg-dac-tracker.firebaseapp.com",
-                projectId: "pg-dac-tracker",
-                storageBucket: "pg-dac-tracker.firebasestorage.app",
-                messagingSenderId: "765871263616",
-                appId: "1:765871263616:web:b3eabf3ab2887414d57b65"
-            },
-            // FULL RESTORED SYLLABUS
-            defaultSyllabus: [
-                { id: "algo", title: "Algorithms (Java)", topics: ["Complexity (Big O)", "Arrays, Stacks", "Recursion", "Trees (BST)", "Searching & Sorting", "Graphs", "DP & Greedy"] },
-                { id: "os", title: "OS Concepts", topics: ["Process Mgmt", "Memory Mgmt", "Deadlocks", "Linux Shell", "Git & DevOps", "Docker"] },
-                { id: "java", title: "Core Java", topics: ["JVM & Basics", "OOP Principles", "Collections", "Streams API", "Multithreading", "Exception Handling"] },
-                { id: "web", title: "Web Technologies", topics: ["HTML5 & CSS3", "JavaScript ES6+", "React Hooks", "Node.js & Express", "REST APIs"] },
-                { id: "dbms", title: "Database Tech", topics: ["SQL Queries", "Normalization", "Joins", "MongoDB", "NoSQL"] },
-                { id: "dotnet", title: "MS.Net Tech", topics: [".Net Framework", "C# Basics", "LINQ", "Async/Await", "ASP.Net MVC"] },
-                { id: "cpp", title: "C++ Programming", topics: ["Pointers", "OOP in C++", "Polymorphism", "Templates & STL"] },
-                { id: "apt", title: "Aptitude", topics: ["Quant", "Logical Reasoning", "Data Interpretation"] }
-            ],
-            shopItems: [
-                { id: "theme_cyber", name: "Cyberpunk", cost: 200, icon: "fa-robot", class: "theme-cyber" },
-                { id: "theme_gold", name: "Midas Touch", cost: 500, icon: "fa-crown", class: "theme-gold" },
-                { id: "theme_hacker", name: "Matrix", cost: 300, icon: "fa-terminal", class: "theme-hacker" },
-                { id: "theme_blood", name: "Crimson", cost: 400, icon: "fa-dragon", class: "theme-blood" }
-            ]
+        // --- SOUND ENGINE ---
+        const sfx = {
+            hover: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'], volume: 0.1 }),
+            click: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3'], volume: 0.3 }),
+            success: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'], volume: 0.5 })
         };
 
-        const state = {
-            user: null,
-            data: {
-                xp: 0, coins: 0,
-                progress: {}, // { "algo-0": { done: true, notes: "", difficulty: "Easy" } }
-                syllabusOrder: [], // ["algo", "os"...]
-                kanban: [],
-                inventory: [], // ["theme_cyber"]
-                activeTheme: ''
-            },
-            pomo: { time: 1500, max: 1500, active: false, interval: null }
-        };
-
+        // --- APP LOGIC ---
         const app = {
+            data: {
+                syllabus: [
+                    { title: "Algorithms & Logic", progress: 75, color: "bg-neon-blue" },
+                    { title: "System Architecture", progress: 40, color: "bg-neon-purple" },
+                    { title: "Database Sharding", progress: 10, color: "bg-neon-pink" },
+                    { title: "React Physics", progress: 90, color: "bg-green-400" }
+                ],
+                timer: null,
+                timeLeft: 1500
+            },
+            
             init: () => {
-                firebase.initializeApp(config.firebase);
-                firebase.firestore().enablePersistence().catch(()=>{});
+                app.ui.renderSyllabus();
+                app.ui.initCursor();
+                app.ui.animateIntro();
                 
-                firebase.auth().onAuthStateChanged(u => {
-                    if (u) {
-                        state.user = u;
-                        document.getElementById('auth-screen').classList.add('hidden');
-                        document.getElementById('app-container').classList.remove('hidden');
-                        setTimeout(() => document.getElementById('app-container').classList.remove('opacity-0'), 100);
-                        document.getElementById('user-name').innerText = u.displayName;
-                        document.getElementById('user-avatar').src = u.photoURL;
-                        app.db.load();
-                    }
+                // Add Sound Listeners
+                document.querySelectorAll('button, .nexus-card, .node').forEach(el => {
+                    el.addEventListener('mouseenter', () => sfx.hover.play());
+                    el.addEventListener('click', () => sfx.click.play());
                 });
-                app.chart.init();
-            },
 
-            db: {
-                load: async () => {
-                    const doc = await firebase.firestore().collection('users').doc(state.user.uid).get();
-                    if (doc.exists) state.data = { ...state.data, ...doc.data() };
-                    
-                    // Defaults if missing
-                    if(!state.data.syllabusOrder || state.data.syllabusOrder.length === 0) {
-                        state.data.syllabusOrder = config.defaultSyllabus.map(s => s.id);
-                    }
-                    if(!state.data.inventory) state.data.inventory = [];
-                    
-                    app.ui.applyTheme(state.data.activeTheme);
-                    app.ui.refreshAll();
-                    app.syllabus.render();
-                    app.kanban.render();
-                    app.shop.render();
-                },
-                save: () => firebase.firestore().collection('users').doc(state.user.uid).set(state.data, { merge: true })
-            },
-
-            nav: {
-                go: (v) => {
-                    document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-                    document.getElementById(`view-${v}`).classList.remove('hidden');
-                    document.getElementById('page-title').innerText = v.charAt(0).toUpperCase() + v.slice(1);
-                }
-            },
-
-            // --- SYLLABUS LOGIC ---
-            syllabus: {
-                currentEditKey: null,
-                render: () => {
-                    const container = document.getElementById('syllabus-container');
-                    container.innerHTML = '';
-                    
-                    state.data.syllabusOrder.forEach(subId => {
-                        const sub = config.defaultSyllabus.find(s => s.id === subId);
-                        if (!sub) return;
-                        
-                        let topicsHtml = '';
-                        sub.topics.forEach((t, i) => {
-                            const key = `${sub.id}-${i}`;
-                            const p = state.data.progress[key] || {};
-                            topicsHtml += `
-                            <div class="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 group border border-transparent hover:border-white/10 transition">
-                                <label class="flex items-center gap-3 cursor-pointer">
-                                    <div class="relative">
-                                        <input type="checkbox" class="peer sr-only" onchange="app.syllabus.check('${key}')" ${p.done ? 'checked' : ''}>
-                                        <div class="w-5 h-5 border-2 border-slate-600 rounded peer-checked:bg-brand-500 peer-checked:border-brand-500 flex items-center justify-center text-white"><i class="fa-solid fa-check text-[10px] opacity-0 peer-checked:opacity-100"></i></div>
-                                    </div>
-                                    <span class="text-sm text-slate-300 ${p.done ? 'line-through opacity-50' : ''}">${t}</span>
-                                    ${p.notes ? '<i class="fa-solid fa-sticky-note text-yellow-500 text-xs" title="Has notes"></i>' : ''}
-                                </label>
-                                <button onclick="app.syllabus.edit('${key}', '${t}')" class="text-slate-500 hover:text-white opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-gear"></i></button>
-                            </div>`;
-                        });
-
-                        const div = document.createElement('div');
-                        div.className = 'glass p-5 rounded-2xl border border-white/5 mb-4 syllabus-card';
-                        div.setAttribute('data-id', sub.id); // For sorting
-                        div.innerHTML = `<h3 class="font-bold text-white mb-3 text-lg border-b border-white/5 pb-2 flex justify-between items-center">${sub.title} <i class="fa-solid fa-bars cursor-move text-slate-600 handle hidden"></i></h3><div class="space-y-1">${topicsHtml}</div>`;
-                        container.appendChild(div);
-                    });
-                },
-                check: (key) => {
-                    if (!state.data.progress[key]) state.data.progress[key] = {};
-                    state.data.progress[key].done = !state.data.progress[key].done;
-                    if(state.data.progress[key].done) {
-                        state.data.xp += 50; state.data.coins += 10;
-                        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
-                    } else {
-                        state.data.xp -= 50;
-                    }
-                    app.db.save(); app.ui.refreshAll();
-                },
-                edit: (key, title) => {
-                    app.syllabus.currentEditKey = key;
-                    const p = state.data.progress[key] || {};
-                    document.getElementById('modal-title').innerText = title;
-                    document.getElementById('modal-difficulty').value = p.difficulty || "Easy";
-                    document.getElementById('modal-time').value = p.time || "";
-                    document.getElementById('modal-notes').value = p.notes || "";
-                    document.getElementById('modal-link').value = p.link || "";
-                    document.getElementById('detail-modal').classList.remove('hidden');
-                },
-                saveDetails: () => {
-                    const key = app.syllabus.currentEditKey;
-                    if(!state.data.progress[key]) state.data.progress[key] = { done: false };
-                    const p = state.data.progress[key];
-                    p.difficulty = document.getElementById('modal-difficulty').value;
-                    p.time = document.getElementById('modal-time').value;
-                    p.notes = document.getElementById('modal-notes').value;
-                    p.link = document.getElementById('modal-link').value;
-                    app.db.save();
-                    document.getElementById('detail-modal').classList.add('hidden');
-                    app.syllabus.render(); // Refresh icons
-                },
-                toggleReorder: () => {
-                    const handles = document.querySelectorAll('.handle');
-                    const isActive = handles[0].classList.contains('hidden');
-                    handles.forEach(h => h.classList.toggle('hidden'));
-                    
-                    const container = document.getElementById('syllabus-container');
-                    if (isActive) {
-                        if(!app.sortable) {
-                            app.sortable = new Sortable(container, {
-                                handle: '.handle',
-                                animation: 150,
-                                onEnd: () => {
-                                    // Save new order
-                                    const cards = document.querySelectorAll('.syllabus-card');
-                                    state.data.syllabusOrder = Array.from(cards).map(c => c.getAttribute('data-id'));
-                                    app.db.save();
-                                }
-                            });
-                        }
-                        app.sortable.option("disabled", false);
-                    } else {
-                        if(app.sortable) app.sortable.option("disabled", true);
-                    }
-                }
-            },
-
-            // --- SHOP LOGIC ---
-            shop: {
-                render: () => {
-                    const grid = document.getElementById('shop-grid');
-                    grid.innerHTML = '';
-                    config.shopItems.forEach(item => {
-                        const owned = state.data.inventory.includes(item.id);
-                        const active = state.data.activeTheme === item.class;
-                        
-                        let btnHtml = `<button onclick="app.shop.buy('${item.id}', ${item.cost})" class="w-full py-2 bg-white/10 hover:bg-brand-600 rounded-lg font-bold text-sm">Buy ${item.cost}</button>`;
-                        if(owned) btnHtml = `<button onclick="app.shop.equip('${item.class}')" class="w-full py-2 ${active ? 'bg-green-500' : 'bg-brand-600'} rounded-lg font-bold text-white text-sm">${active ? 'Equipped' : 'Equip'}</button>`;
-
-                        grid.innerHTML += `
-                        <div class="glass p-6 rounded-2xl flex flex-col items-center border border-white/5 hover:border-brand-500 transition relative overflow-hidden">
-                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center text-3xl text-white mb-4"><i class="fa-solid ${item.icon}"></i></div>
-                            <h3 class="font-bold text-white">${item.name}</h3>
-                            <div class="mt-4 w-full">${btnHtml}</div>
-                        </div>`;
-                    });
-                    document.getElementById('shop-balance').innerText = state.data.coins;
-                },
-                buy: (id, cost) => {
-                    if (state.data.coins >= cost) {
-                        state.data.coins -= cost;
-                        state.data.inventory.push(id);
-                        app.db.save(); app.shop.render(); app.ui.refreshAll();
-                        alert("Purchase Successful!");
-                    } else {
-                        alert("Not enough coins!");
-                    }
-                },
-                equip: (cls) => {
-                    state.data.activeTheme = cls;
-                    app.ui.applyTheme(cls);
-                    app.db.save(); app.shop.render();
-                }
+                // Live Feed Simulator
+                setInterval(() => {
+                    const names = ["Sarah", "Davide", "Jin", "Aara"];
+                    const tasks = ["fixed a bug", "deployed app", "finished SQL", "earned 'Titan' badge"];
+                    const name = names[Math.floor(Math.random() * names.length)];
+                    const task = tasks[Math.floor(Math.random() * tasks.length)];
+                    const el = document.getElementById('live-user');
+                    el.style.opacity = 0;
+                    setTimeout(() => {
+                        el.innerText = `${name} ${task}`;
+                        el.style.opacity = 1;
+                    }, 500);
+                }, 5000);
             },
 
             ui: {
-                refreshAll: () => {
-                    document.getElementById('stat-xp').innerText = state.data.xp;
-                    document.getElementById('coin-display').innerText = state.data.coins;
-                    // Count total done
-                    let c = 0;
-                    Object.values(state.data.progress).forEach(p => { if(p.done) c++ });
-                    document.getElementById('stat-topics').innerText = c;
-                    app.chart.update();
+                initCursor: () => {
+                    const dot = document.getElementById('cursor-dot');
+                    const outline = document.getElementById('cursor-outline');
+                    
+                    window.addEventListener('mousemove', (e) => {
+                        const posX = e.clientX;
+                        const posY = e.clientY;
+                        
+                        // Dot follows instantly
+                        dot.style.left = `${posX}px`;
+                        dot.style.top = `${posY}px`;
+                        
+                        // Outline follows with delay (GSAP)
+                        gsap.to(outline, { x: posX, y: posY, duration: 0.15, ease: "power2.out" });
+                    });
+                    
+                    // Hover effects
+                    document.querySelectorAll('a, button, .cursor-pointer').forEach(el => {
+                        el.addEventListener('mouseenter', () => {
+                            gsap.to(outline, { scale: 1.5, borderColor: '#fff', duration: 0.2 });
+                        });
+                        el.addEventListener('mouseleave', () => {
+                            gsap.to(outline, { scale: 1, borderColor: 'rgba(0, 243, 255, 0.5)', duration: 0.2 });
+                        });
+                    });
                 },
-                applyTheme: (cls) => {
-                    document.body.className = "bg-slate-50 dark:bg-dark-bg text-slate-800 dark:text-slate-200 transition-colors duration-300 " + (cls || '');
+
+                animateIntro: () => {
+                    gsap.from(".nexus-card", {
+                        y: 50, opacity: 0, duration: 1, stagger: 0.2, ease: "power3.out"
+                    });
+                    gsap.from(".counter", {
+                        textContent: 0, duration: 2, ease: "power1.out", snap: { textContent: 1 },
+                        stagger: 0.2
+                    });
                 },
-                togglePomo: () => {
-                    const el = document.getElementById('pomo-overlay');
-                    el.classList.toggle('hidden');
+
+                renderSyllabus: () => {
+                    const container = document.getElementById('syllabus-list');
+                    app.data.syllabus.forEach(item => {
+                        container.innerHTML += `
+                        <div class="group flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition border border-transparent hover:border-white/5 cursor-pointer">
+                            <div class="w-10 h-10 rounded-lg ${item.color}/20 flex items-center justify-center text-white font-bold">${item.progress}%</div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-slate-200 group-hover:text-white transition">${item.title}</h4>
+                                <div class="w-full h-1 bg-white/10 rounded-full mt-2 overflow-hidden">
+                                    <div class="h-full ${item.color} w-0 group-hover:w-[${item.progress}%] transition-all duration-1000" style="width: ${item.progress}%"></div>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-600 group-hover:text-white transition-transform group-hover:translate-x-1"></i>
+                        </div>`;
+                    });
+                },
+
+                openNode: (title) => {
+                    const modal = document.getElementById('node-modal');
+                    const card = document.getElementById('node-card');
+                    document.getElementById('modal-title').innerText = title;
+                    
+                    modal.classList.remove('hidden');
+                    // Animate In
+                    gsap.to(card, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.7)" });
+                },
+
+                closeNode: () => {
+                    const modal = document.getElementById('node-modal');
+                    const card = document.getElementById('node-card');
+                    gsap.to(card, { scale: 0.9, opacity: 0, duration: 0.3, onComplete: () => modal.classList.add('hidden') });
+                },
+
+                toggleZen: () => {
+                    const sidebar = document.querySelector('aside');
+                    const header = document.querySelector('header');
+                    
+                    if (sidebar.style.display === 'none') {
+                        sidebar.style.display = 'flex';
+                        header.style.display = 'flex';
+                    } else {
+                        sidebar.style.display = 'none';
+                        header.style.display = 'none';
+                        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                    }
+                }
+            },
+
+            nav: {
+                switch: (view) => {
+                    // Fade out current
+                    gsap.to(".view-section", { opacity: 0, duration: 0.3, onComplete: () => {
+                        document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                        const target = document.getElementById(`view-${view}`);
+                        target.classList.remove('hidden');
+                        target.style.opacity = 0;
+                        
+                        // Special Animation for Constellation
+                        if(view === 'constellation') {
+                            const svg = document.getElementById('network-svg');
+                            svg.classList.remove('scale-90', 'opacity-0');
+                        }
+                        
+                        // Fade in new
+                        gsap.to(target, { opacity: 1, duration: 0.5 });
+                    }});
+                    
+                    // Update Active Nav State
+                    // (Simplified for demo)
                 }
             },
 
             pomo: {
                 toggle: () => {
-                    if (state.pomo.active) {
-                        clearInterval(state.pomo.interval);
-                        document.getElementById('pomo-btn').innerHTML = '<i class="fa-solid fa-play ml-1"></i>';
+                    const overlay = document.getElementById('focus-overlay');
+                    if (overlay.classList.contains('hidden')) {
+                        overlay.classList.remove('hidden');
+                        gsap.to(overlay, { opacity: 1, duration: 0.5 });
                     } else {
-                        state.pomo.interval = setInterval(() => {
-                            state.pomo.time--;
-                            const m = Math.floor(state.pomo.time/60).toString().padStart(2,'0');
-                            const s = (state.pomo.time%60).toString().padStart(2,'0');
-                            document.getElementById('timer-display').innerText = `${m}:${s}`;
-                            const pct = (state.pomo.time/state.pomo.max)*816;
-                            document.getElementById('timer-ring').style.strokeDashoffset = 816 - pct;
-                            if(state.pomo.time<=0) { clearInterval(state.pomo.interval); alert("Done!"); }
-                        }, 1000);
-                        document.getElementById('pomo-btn').innerHTML = '<i class="fa-solid fa-pause"></i>';
+                        gsap.to(overlay, { opacity: 0, duration: 0.5, onComplete: () => overlay.classList.add('hidden') });
                     }
-                    state.pomo.active = !state.pomo.active;
                 },
-                startQuick: () => { app.ui.togglePomo(); app.pomo.toggle(); }
-            },
-
-            kanban: {
-                render: () => {
-                    ['todo','doing','done'].forEach(s => {
-                        const col = document.querySelector(`.kanban-col[data-status="${s}"]`);
-                        col.innerHTML = '';
-                        state.data.kanban.filter(k => k.status === s).forEach(k => {
-                            const d = document.createElement('div');
-                            d.className = 'bg-dark-card p-3 rounded-lg border border-white/10 text-white text-sm cursor-move shadow-lg';
-                            d.innerText = k.text;
-                            col.appendChild(d);
-                        });
-                        new Sortable(col, { group: 'kanban', onEnd: (evt) => {
-                            const txt = evt.item.innerText;
-                            const item = state.data.kanban.find(i => i.text === txt);
-                            if(item) { item.status = evt.to.dataset.status; app.db.save(); }
-                        }});
-                    });
+                start: () => {
+                    // Simple Timer Logic
+                    if(app.data.timer) return;
+                    app.data.timer = setInterval(() => {
+                        app.data.timeLeft--;
+                        const m = Math.floor(app.data.timeLeft / 60);
+                        const s = app.data.timeLeft % 60;
+                        document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                        if(app.data.timeLeft <= 0) {
+                            clearInterval(app.data.timer);
+                            sfx.success.play();
+                            alert("FOCUS COMPLETE. SYSTEM UPGRADED.");
+                        }
+                    }, 1000);
                 },
-                addCard: () => {
-                    const t = prompt("Task:");
-                    if(t) { state.data.kanban.push({text:t, status:'todo'}); app.db.save(); app.kanban.render(); }
-                }
-            },
-
-            auth: {
-                signIn: () => { const p = new firebase.auth.GoogleAuthProvider(); firebase.auth().signInWithPopup(p); },
-                signOut: () => firebase.auth().signOut().then(() => location.reload())
-            },
-            
-            chart: {
-                instance: null,
-                init: () => {
-                    app.chart.instance = new Chart(document.getElementById('mainChart'), {
-                        type: 'doughnut',
-                        data: { labels: ['Done','Left'], datasets: [{ data: [0,100], backgroundColor: ['#6366f1','#1f2937'], borderWidth:0 }] },
-                        options: { cutout: '75%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-                    });
-                },
-                update: () => {
-                    if(!app.chart.instance) return;
-                    let total = 0; config.defaultSyllabus.forEach(s => total += s.topics.length);
-                    let done = 0; Object.values(state.data.progress).forEach(p => { if(p.done) done++ });
-                    app.chart.instance.data.datasets[0].data = [done, total-done];
-                    app.chart.instance.update();
+                reset: () => {
+                    clearInterval(app.data.timer);
+                    app.data.timer = null;
+                    app.data.timeLeft = 1500;
+                    document.getElementById('timer').innerText = "25:00";
                 }
             }
         };
 
-        document.addEventListener('DOMContentLoaded', app.init);
+        // Boot System
+        window.addEventListener('load', app.init);
     </script>
 </body>
 </html>
